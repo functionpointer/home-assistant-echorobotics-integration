@@ -12,9 +12,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import (
-    STATE_CLASS_MEASUREMENT,
     PERCENTAGE,
 )
 
@@ -25,7 +24,7 @@ from .const import DOMAIN, RobotId
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Set up a sensor entries."""
+    """Set up sensor entries."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
         [
@@ -96,8 +95,9 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
     ):
         super().__init__(robot_id, coordinator)
         self._attr_unique_id = f"{robot_id}-state"
+        self._attr_name = "State"
         self._attr_icon = "mdi:robot-mower"
-        self._attr_state_class = STATE_CLASS_MEASUREMENT
+        self._attr_state_class = None
         self._attr_translation_key = "state_sensor"
 
     def _read_coordinator_data(self) -> None:
@@ -114,10 +114,11 @@ class EchoRoboticsBatterySensor(EchoRoboticsSensor):
         self, robot_id: RobotId, coordinator: EchoRoboticsDataUpdateCoordinator
     ):
         super().__init__(robot_id, coordinator)
-        self._attr_unique_id = f"{robot_id}-state"
+        self._attr_unique_id = f"{robot_id}-battery"
+        self._attr_name = "Battery"
         self._attr_device_class = SensorDeviceClass.BATTERY
         self._attr_native_unit_of_measurement = PERCENTAGE
-        self._attr_state_class = STATE_CLASS_MEASUREMENT
+        self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_translation_key = "battery_sensor"
         self._attr_suggested_display_precision = 1
 
@@ -127,4 +128,4 @@ class EchoRoboticsBatterySensor(EchoRoboticsSensor):
         if si is None:
             self._attr_native_value = None
         else:
-            self._attr_native_value = si.estimated_battery_level
+            self._attr_native_value = round(si.estimated_battery_level, ndigits=1)
