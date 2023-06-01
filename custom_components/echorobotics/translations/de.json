@@ -30,10 +30,10 @@
       "work": {
         "name": "arbeiten"
       },
-      "chargeAndStay": {
+      "charge_and_stay": {
         "name": "aufladen und bleiben"
       },
-      "chargeAndWork": {
+      "charge_and_work": {
         "name": "aufladen und arbeiten"
       }
     },
@@ -44,16 +44,16 @@
       "state_sensor": {
         "name": "Status",
         "state": {
-          "Offline": "Offline",
-          "Alarm state": "Alarmzustand",
-          "Idle": "Idle",
-          "WaitStation": "Warten an Ladestation",
-          "Charge": "Aufladen",
-          "GoUnloadStation": "GoUnloadStation",
-          "GoChargeStation": "Zur Ladestation fahren",
-          "Work": "Arbeiten",
-          "LeaveStation": "Ladestation verlassen",
-          "Off": "Ausgeschaltet"
+          "offline": "Offline",
+          "alarm_state": "Alarmzustand",
+          "idle": "Idle",
+          "wait_station": "Warten an Ladestation",
+          "charge": "Aufladen",
+          "go_unload_station": "GoUnloadStation",
+          "go_charge_station": "Zur Ladestation fahren",
+          "work": "Arbeiten",
+          "leave_station": "Ladestation verlassen",
+          "off": "Ausgeschaltet"
         }
       }
     }

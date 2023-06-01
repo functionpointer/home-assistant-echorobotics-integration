@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import re
 
 import echoroboticsapi
 from echoroboticsapi.models import Mode
@@ -53,8 +54,10 @@ class EchoRoboticsSetModeButton(EchoRoboticsBaseEntity, ButtonEntity):
         super().__init__(robot_id, coordinator)
         self.logger = logging.getLogger(__name__)
 
-        self.mode = mode
-        self._attr_translation_key = mode
+        self.raw_mode = mode
+        # regex from https://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-snake-case
+        self.nice_mode = re.sub(r"(?<!^)(?=[A-Z])", "_", self.raw_mode).lower()
+        self._attr_translation_key = self.nice_mode
         self._attr_unique_id = f"{robot_id}-{mode}"
         self._attr_icon = self.iconmap.get(mode, None)
 
@@ -67,6 +70,6 @@ class EchoRoboticsSetModeButton(EchoRoboticsBaseEntity, ButtonEntity):
         returncode = await self._api.set_mode(self.mode)
         if returncode != 200:
             raise ValueError(
-                f"couldn't set mode {self.mode}, api returned {returncode}"
+                f"couldn't set mode {self.raw_mode}, api returned {returncode}"
             )
         await self.coordinator.async_schedule_multiple_refreshes()
