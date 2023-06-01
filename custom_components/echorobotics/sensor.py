@@ -40,9 +40,7 @@ async def async_setup_entry(
     )
 
 
-class EchoRoboticsSensor(
-    EchoRoboticsBaseEntity, SensorEntity
-):
+class EchoRoboticsSensor(EchoRoboticsBaseEntity, SensorEntity):
     """Sensor reporting the current state of the robot"""
 
     def __init__(
@@ -75,7 +73,19 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
         if si is None:
             self._attr_native_value = None
         else:
-            self._attr_native_value = si.status
+            normalize_case = {
+                "Offline": "offline",
+                "Alarm state": "alarm_state",
+                "Idle": "idle",
+                "WaitStation": "wait_station",
+                "Charge": "charge",
+                "GoUnloadStation": "go_unload_station",
+                "GoChargeStation": "go_charge_station",
+                "Work": "work",
+                "LeaveStation": "leave_station",
+                "Off": "off",
+            }
+            self._attr_native_value = normalize_case.get(si.status, si.status)
 
 
 class EchoRoboticsBatterySensor(EchoRoboticsSensor):
