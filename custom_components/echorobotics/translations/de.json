@@ -28,13 +28,13 @@
     },
     "button": {
       "work": {
-        "name": "Arbeiten"
+        "name": "arbeiten"
       },
       "chargeAndStay": {
-        "name": "Aufladen und Bleiben"
+        "name": "aufladen und bleiben"
       },
       "chargeAndWork": {
-        "name": "Aufladen und Arbeiten"
+        "name": "aufladen und arbeiten"
       }
     },
     "sensor": {

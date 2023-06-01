@@ -28,13 +28,13 @@
     },
     "button": {
       "work": {
-        "name": "Work"
+        "name": "work"
       },
       "chargeAndStay": {
-        "name": "Charge and stay"
+        "name": "charge and stay"
       },
       "chargeAndWork": {
-        "name": "Charge and work"
+        "name": "charge and work"
       }
     },
     "sensor": {
@@ -44,16 +44,16 @@
       "state_sensor": {
         "name": "State",
         "state": {
-          "Offline": "Offline",
-          "Alarm state": "Alarm state",
-          "Idle": "Idle",
-          "WaitStation": "Wait at charging station",
-          "Charge": "Charging",
-          "GoUnloadStation": "Go to unload station",
-          "GoChargeStation": "Go to charging station",
-          "Work": "Working",
-          "LeaveStation": "Leaving station",
-          "Off": "Off"
+          "Offline": "offline",
+          "Alarm state": "alarm state",
+          "Idle": "idle",
+          "WaitStation": "wait at charging station",
+          "Charge": "charging",
+          "GoUnloadStation": "go to unload station",
+          "GoChargeStation": "go to charging station",
+          "Work": "working",
+          "LeaveStation": "leaving station",
+          "Off": "off"
         }
       }
     }
