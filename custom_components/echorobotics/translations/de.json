@@ -3,7 +3,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Login data",
+        "title": "Logindaten",
         "data": {
           "user_id": "user id",
           "user_token": "user token",
@@ -20,21 +20,21 @@
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
     }
   },
-"entity": {
+  "entity": {
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Position"
       }
     },
     "button": {
       "work": {
-        "name": "Work"
+        "name": "Arbeiten"
       },
       "chargeAndStay": {
-        "name": "Charge and stay"
+        "name": "Aufladen und Bleiben"
       },
       "chargeAndWork": {
-        "name": "Charge and work"
+        "name": "Aufladen und Arbeiten"
       }
     },
     "sensor": {
@@ -42,18 +42,18 @@
         "name": "[%key:component::sensor::entity_component::battery::name%]"
       },
       "state_sensor": {
-        "name": "State",
+        "name": "Status",
         "state": {
           "Offline": "Offline",
-          "Alarm state": "Alarm state",
+          "Alarm state": "Alarmzustand",
           "Idle": "Idle",
-          "WaitStation": "Wait at charging station",
-          "Charge": "Charging",
-          "GoUnloadStation": "Go to unload station",
-          "GoChargeStation": "Go to charging station",
-          "Work": "Working",
-          "LeaveStation": "Leaving station",
-          "Off": "Off"
+          "WaitStation": "Warten an Ladestation",
+          "Charge": "Aufladen",
+          "GoUnloadStation": "GoUnloadStation",
+          "GoChargeStation": "Zur Ladestation fahren",
+          "Work": "Arbeiten",
+          "LeaveStation": "Ladestation verlassen",
+          "Off": "Ausgeschaltet"
         }
       }
     }
