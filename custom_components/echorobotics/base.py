@@ -26,7 +26,6 @@ class EchoRoboticsBaseEntity(CoordinatorEntity[EchoRoboticsDataUpdateCoordinator
         self.logger = logging.getLogger(__name__)
         self.robot_id = robot_id
 
-        self._attr_attribution = "echorobotics.com"
         self._attr_device_info = DeviceInfo(
             name=robot_id,
             identifiers={(DOMAIN, robot_id)},
@@ -34,6 +33,10 @@ class EchoRoboticsBaseEntity(CoordinatorEntity[EchoRoboticsDataUpdateCoordinator
             manufacturer="Echorobotics",
         )
         self._read_coordinator_data()
+
+    @property
+    def attribution(self):
+        return "echorobotics.com"
 
     @callback
     def _handle_coordinator_update(self) -> None:

@@ -1,6 +1,7 @@
 """The echorobotics integration."""
 from __future__ import annotations
 
+import asyncio
 import logging
 
 import async_timeout
@@ -65,6 +66,15 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         )
         self.api = api
 
+    async def async_schedule_multiple_refreshes(self):
+        async def refresh_later(sleep: float):
+            await asyncio.sleep(sleep)
+            _LOGGER.debug("fetching state after %ss", sleep)
+            await self.async_request_refresh()
+
+        for sleeptime in [2, 10, 20, 40, 60]:
+            asyncio.create_task(refresh_later(sleeptime))
+
     def get_status_info(self, robot_id: RobotId) -> echoroboticsapi.StatusInfo | None:
         if self.data:
             laststatuses: echoroboticsapi.models.LastStatuses = self.data
@@ -88,4 +98,6 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
             status = await self.api.last_statuses()
             if status is None:
                 _LOGGER.info("received empty update")
+            else:
+                _LOGGER.debug("received state %s", status)
             return status

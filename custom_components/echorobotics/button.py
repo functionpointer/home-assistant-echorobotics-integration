@@ -69,3 +69,4 @@ class EchoRoboticsSetModeButton(EchoRoboticsBaseEntity, ButtonEntity):
             raise ValueError(
                 f"couldn't set mode {self.mode}, api returned {returncode}"
             )
+        await self.coordinator.async_schedule_multiple_refreshes()
