@@ -39,8 +39,8 @@ class EchoRoboticsLocation(
     ) -> None:
         """Initialize location entity."""
         super().__init__(robot_id, coordinator)
-        self._attr_name = "Location"
         self._attr_unique_id = f"{robot_id}-location"
+        self._attr_translation_key = "location"
 
     @property
     def status_info(self) -> echoroboticsapi.StatusInfo | None:

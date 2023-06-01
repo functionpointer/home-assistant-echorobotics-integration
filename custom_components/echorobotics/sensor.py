@@ -65,7 +65,6 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
     ):
         super().__init__(robot_id, coordinator)
         self._attr_unique_id = f"{robot_id}-state"
-        self._attr_name = "State"
         self._attr_icon = "mdi:robot-mower"
         self._attr_state_class = None
         self._attr_translation_key = "state_sensor"

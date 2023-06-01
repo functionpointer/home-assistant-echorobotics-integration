@@ -54,7 +54,7 @@ class EchoRoboticsSetModeButton(EchoRoboticsBaseEntity, ButtonEntity):
         self.logger = logging.getLogger(__name__)
 
         self.mode = mode
-        self._attr_name = f"{mode}"
+        self._attr_translation_key = mode
         self._attr_unique_id = f"{robot_id}-{mode}"
         self._attr_icon = self.iconmap.get(mode, None)
 
