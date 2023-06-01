@@ -15,6 +15,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
 
 from . import EchoRoboticsDataUpdateCoordinator
+from .base import EchoRoboticsBaseEntity
 from .const import DOMAIN, RobotId
 
 
@@ -25,16 +26,22 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
         [
-            EchoRoboticsSetModeButton(mode=m, coordinator=coordinator, robot_id=entry.data["robot_id"])
+            EchoRoboticsSetModeButton(
+                mode=m, coordinator=coordinator, robot_id=entry.data["robot_id"]
+            )
             for m in typing.get_args(echoroboticsapi.models.Mode)
         ]
     )
 
-class EchoRoboticsSetModeButton(ButtonEntity):
+
+class EchoRoboticsSetModeButton(EchoRoboticsBaseEntity, ButtonEntity):
     """Button"""
 
-    _attr_has_entity_name = True
-    iconmap = {"work": "mdi:mower-on", "chargeAndStay": "mdi:sleep", "chargeAndWork": "mdi:mower-on"}
+    iconmap = {
+        "work": "mdi:mower-on",
+        "chargeAndStay": "mdi:sleep",
+        "chargeAndWork": "mdi:mower-on",
+    }
 
     def __init__(
         self,
@@ -43,20 +50,13 @@ class EchoRoboticsSetModeButton(ButtonEntity):
         robot_id: RobotId,
     ) -> None:
         """Initialize the Button."""
-        super().__init__()
-        self.mode = mode
-        self.coordinator = coordinator
+        super().__init__(robot_id, coordinator)
         self.logger = logging.getLogger(__name__)
-        self.robot_id = robot_id
-        self._attr_attribution = "echorobotics.com"
+
+        self.mode = mode
         self._attr_name = f"{mode}"
         self._attr_unique_id = f"{robot_id}-{mode}"
         self._attr_icon = self.iconmap.get(mode, None)
-        self._attr_device_info = DeviceInfo(
-            name=robot_id,
-            identifiers={(DOMAIN, robot_id)},
-            entry_type=None,
-        )
 
     @property
     def _api(self) -> echoroboticsapi.Api:

@@ -12,11 +12,11 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN, UPDATE_INTERVAL
+from .const import DOMAIN, UPDATE_INTERVAL, RobotId
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON, Platform.DEVICE_TRACKER]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -64,6 +64,17 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=UPDATE_INTERVAL,
         )
         self.api = api
+
+    def get_status_info(self, robot_id: RobotId) -> echoroboticsapi.StatusInfo | None:
+        if self.data:
+            laststatuses: echoroboticsapi.models.LastStatuses = self.data
+            for si in laststatuses.statuses_info:
+                if si.robot == robot_id:
+                    return si
+            self.logger.warning(
+                "robot_id %s not found in %s", self.robot_id, laststatuses
+            )
+        return None
 
     async def _async_update_data(self) -> echoroboticsapi.LastStatuses | None:
         """Fetch data from API endpoint.
