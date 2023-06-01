@@ -19,6 +19,7 @@ from homeassistant.const import (
 
 from . import EchoRoboticsDataUpdateCoordinator
 from .const import DOMAIN, RobotId
+from .base import EchoRoboticsBaseEntity
 
 
 async def async_setup_entry(
@@ -40,11 +41,9 @@ async def async_setup_entry(
 
 
 class EchoRoboticsSensor(
-    CoordinatorEntity[EchoRoboticsDataUpdateCoordinator], SensorEntity
+    EchoRoboticsBaseEntity, SensorEntity
 ):
     """Sensor reporting the current state of the robot"""
-
-    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -52,41 +51,12 @@ class EchoRoboticsSensor(
         coordinator: EchoRoboticsDataUpdateCoordinator,
     ) -> None:
         """Initialize the Sensor."""
-        super().__init__(coordinator)
+        super().__init__(robot_id, coordinator)
         self.logger = logging.getLogger(__name__)
-        self.coordinator = coordinator
-        self.robot_id = robot_id
-        self._attr_attribution = "echorobotics.com"
+
         self._attr_device_class = None
         self._attr_native_unit_of_measurement = None
         self._attr_state_class = None
-        self._attr_device_info = DeviceInfo(
-            name=robot_id,
-            identifiers={(DOMAIN, robot_id)},
-            entry_type=None,
-        )
-        # read data from coordinator, which should have data by now
-        self._read_coordinator_data()
-
-    def _get_status_info(self) -> StatusInfo | None:
-        if self.coordinator.data:
-            laststatuses: echoroboticsapi.models.LastStatuses = self.coordinator.data
-            for si in laststatuses.statuses_info:
-                if si.robot == self.robot_id:
-                    return si
-            self.logger.warning(
-                "robot_id %s not found in %s", self.robot_id, laststatuses
-            )
-        return None
-
-    def _read_coordinator_data(self) -> None:
-        pass
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        self._read_coordinator_data()
-        self.async_write_ha_state()
 
 
 class EchoRoboticsStateSensor(EchoRoboticsSensor):
@@ -102,7 +72,7 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
 
     def _read_coordinator_data(self) -> None:
         super()._read_coordinator_data()
-        si = self._get_status_info()
+        si = self.status_info
         if si is None:
             self._attr_native_value = None
         else:
@@ -124,7 +94,7 @@ class EchoRoboticsBatterySensor(EchoRoboticsSensor):
 
     def _read_coordinator_data(self) -> None:
         super()._read_coordinator_data()
-        si = self._get_status_info()
+        si = self.status_info
         if si is None:
             self._attr_native_value = None
         else:
