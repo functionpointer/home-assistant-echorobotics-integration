@@ -53,7 +53,11 @@
           "go_charge_station": "go to charging station",
           "work": "working",
           "leave_station": "leaving station",
-          "off": "off"
+          "off": "off",
+          "go_station": "go to station",
+          "unknown": "unknown",
+          "warning": "warning",
+          "border": "border"
         }
       }
     }

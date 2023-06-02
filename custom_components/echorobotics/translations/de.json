@@ -53,7 +53,11 @@
           "go_charge_station": "Zur Ladestation fahren",
           "work": "Arbeiten",
           "leave_station": "Ladestation verlassen",
-          "off": "Ausgeschaltet"
+          "off": "Ausgeschaltet",
+          "go_station": "Zur Station fahren",
+          "unknown": "Unbekannt",
+          "warning": "Warnung",
+          "border": "Rand"
         }
       }
     }
