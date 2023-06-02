@@ -75,7 +75,7 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
         else:
             normalize_case = {
                 "Offline": "offline",
-                "Alarm state": "alarm_state",
+                "Alarm": "alarm",
                 "Idle": "idle",
                 "WaitStation": "wait_station",
                 "Charge": "charge",

@@ -45,7 +45,7 @@
         "name": "Status",
         "state": {
           "offline": "Offline",
-          "alarm_state": "Alarmzustand",
+          "alarm": "Alarm",
           "idle": "Idle",
           "wait_station": "Warten an Ladestation",
           "charge": "Aufladen",

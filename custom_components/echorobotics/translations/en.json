@@ -45,7 +45,7 @@
         "name": "State",
         "state": {
           "offline": "offline",
-          "alarm_state": "alarm state",
+          "alarm": "alarm",
           "idle": "idle",
           "wait_station": "wait at charging station",
           "charge": "charging",
