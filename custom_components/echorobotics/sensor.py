@@ -84,6 +84,10 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
                 "Work": "work",
                 "LeaveStation": "leave_station",
                 "Off": "off",
+                "GoStation": "go_station",
+                "Unknown": "unknown",
+                "Warning": "warning",
+                "Border": "border",
             }
             self._attr_native_value = normalize_case.get(si.status, si.status)
 
