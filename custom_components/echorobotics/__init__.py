@@ -91,20 +91,31 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _fetch_getconfig(self):
         """Fetch getconfig from robot, but not on every update"""
-        if self.getconfig_data is None or time.time() > self.getconfig_tstamp+GETCONFIG_UPDATE_INTERVAL:
+        time_to_fetch = (
+            time.time()
+            > self.getconfig_tstamp + GETCONFIG_UPDATE_INTERVAL.total_seconds()
+        )
+
+        if self.getconfig_data is None or time_to_fetch:
             newdata: echoroboticsapi.GetConfig | None = None
+            _LOGGER.debug("fetching getconfig reload=True")
+
             async with async_timeout.timeout(10):
                 await self.api.get_config(reload=True)
 
             async with async_timeout.timeout(30):
                 while newdata is None or not newdata.config_validated:
                     await asyncio.sleep(2)
+                    _LOGGER.debug("fetching getconfig reload=False")
                     newdata = await self.api.get_config(reload=False)
+                _LOGGER.debug("getconfig success")
 
             if newdata is None or not newdata.config_validated:
                 self.getconfig_data = None
+                _LOGGER.debug("could not getconfig")
             else:
                 self.getconfig_data = newdata
+                self.getconfig_tstamp = time.time()
 
     async def _async_update_data(self) -> echoroboticsapi.LastStatuses | None:
         """Fetch data from API endpoint.
