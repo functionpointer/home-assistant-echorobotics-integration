@@ -3,4 +3,5 @@ from datetime import timedelta
 
 DOMAIN = "echorobotics"
 UPDATE_INTERVAL = timedelta(minutes=2)
+GETCONFIG_UPDATE_INTERVAL = timedelta(days=1)
 RobotId = str
