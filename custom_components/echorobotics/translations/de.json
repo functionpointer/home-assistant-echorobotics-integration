@@ -35,6 +35,9 @@
       },
       "charge_and_work": {
         "name": "aufladen und arbeiten"
+      },
+      "force_data_update": {
+        "name": "Daten aktualisieren"
       }
     },
     "sensor": {
