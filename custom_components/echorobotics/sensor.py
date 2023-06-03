@@ -88,6 +88,8 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
                 "Unknown": "unknown",
                 "Warning": "warning",
                 "Border": "border",
+                "BorderCheck": "border_check",
+                "BorderDiscovery": "border_discovery",
             }
             self._attr_native_value = normalize_case.get(si.status, si.status)
 

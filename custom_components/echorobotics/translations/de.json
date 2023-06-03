@@ -46,7 +46,7 @@
         "state": {
           "offline": "Offline",
           "alarm": "Alarm",
-          "idle": "Idle",
+          "idle": "Bleiben",
           "wait_station": "Warten an Ladestation",
           "charge": "Aufladen",
           "go_unload_station": "GoUnloadStation",
@@ -57,7 +57,9 @@
           "go_station": "Zur Station fahren",
           "unknown": "Unbekannt",
           "warning": "Warnung",
-          "border": "Rand"
+          "border": "Rand",
+          "border_check": "Rand Test",
+          "border_discovery": "Rand entdecken"
         }
       }
     }
