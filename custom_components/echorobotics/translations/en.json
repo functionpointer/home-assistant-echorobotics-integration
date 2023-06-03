@@ -57,7 +57,9 @@
           "go_station": "go to station",
           "unknown": "unknown",
           "warning": "warning",
-          "border": "border"
+          "border": "border",
+          "border_check": "border check",
+          "border_discovery": "border discovery"
         }
       }
     }
