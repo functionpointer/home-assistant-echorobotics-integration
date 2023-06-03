@@ -9,6 +9,7 @@ from echoroboticsapi.models import Mode
 import typing
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -31,6 +32,11 @@ async def async_setup_entry(
                 mode=m, coordinator=coordinator, robot_id=entry.data["robot_id"]
             )
             for m in typing.get_args(echoroboticsapi.models.Mode)
+        ]
+        + [
+            EchoRoboticsForceDataUpdateButton(
+                coordinator=coordinator, robot_id=entry.data["robot_id"]
+            ),
         ]
     )
 
@@ -73,3 +79,19 @@ class EchoRoboticsSetModeButton(EchoRoboticsBaseEntity, ButtonEntity):
                 f"couldn't set mode {self.raw_mode}, api returned {returncode}"
             )
         await self.coordinator.async_schedule_multiple_refreshes()
+
+
+class EchoRoboticsForceDataUpdateButton(EchoRoboticsBaseEntity, ButtonEntity):
+    def __init__(
+        self, coordinator: EchoRoboticsDataUpdateCoordinator, robot_id: RobotId
+    ):
+        super().__init__(robot_id, coordinator)
+        self.logger = logging.getLogger(__name__)
+
+        self._attr_translation_key = "force_data_update"
+        self._attr_unique_id = f"{robot_id}-force-data-update"
+        self._attr_icon = "mdi:database-sync"
+        self._attr_entity_category = EntityCategory.CONFIG
+
+    async def async_press(self) -> None:
+        await self.coordinator.async_request_refresh()

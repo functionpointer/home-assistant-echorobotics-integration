@@ -35,6 +35,9 @@
       },
       "charge_and_work": {
         "name": "charge and work"
+      },
+      "force_data_update": {
+        "name": "force data update"
       }
     },
     "sensor": {
