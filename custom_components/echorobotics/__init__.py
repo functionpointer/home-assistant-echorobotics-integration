@@ -14,11 +14,17 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN, UPDATE_INTERVAL, RobotId, GETCONFIG_UPDATE_INTERVAL
+from .const import (
+    DOMAIN,
+    UPDATE_INTERVAL,
+    RobotId,
+    GETCONFIG_UPDATE_INTERVAL,
+    HISTORY_UPDATE_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON, Platform.DEVICE_TRACKER]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON, Platform.DEVICE_TRACKER, Platform.SWITCH]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -35,9 +41,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ),
         robot_ids=[entry.data["robot_id"]],
     )
+    smartmode = echoroboticsapi.SmartMode(entry.data["robot_id"])
+    api.register_smart_mode(smartmode)
     # missing: validate api connection
 
-    coordinator = EchoRoboticsDataUpdateCoordinator(hass, api)
+    coordinator = EchoRoboticsDataUpdateCoordinator(hass, api, smartmode)
     hass.data[DOMAIN][entry.entry_id] = coordinator
     await coordinator.async_config_entry_first_refresh()
 
@@ -57,7 +65,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
     """My custom coordinator."""
 
-    def __init__(self, hass, api: echoroboticsapi.Api):
+    def __init__(
+        self, hass, api: echoroboticsapi.Api, smartmode: echoroboticsapi.SmartMode
+    ):
         """Initialize my coordinator."""
         super().__init__(
             hass,
@@ -66,6 +76,10 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=UPDATE_INTERVAL,
         )
         self.api = api
+        self.smartmode = smartmode
+
+        self.history_tstamp: int = 0
+
         self.getconfig_data: echoroboticsapi.GetConfig | None = None
         self.getconfig_tstamp: int = 0
 
@@ -117,6 +131,17 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
                 self.getconfig_data = newdata
                 self.getconfig_tstamp = time.time()
 
+    async def _fetch_history(self) -> None:
+        time_to_fetch = (
+            time.time() > self.history_tstamp + HISTORY_UPDATE_INTERVAL.total_seconds()
+        )
+
+        if time_to_fetch:
+            async with async_timeout.timeout(10):
+                self.history_tstamp = time.time()
+                _LOGGER.debug("fetching history")
+                await self.api.history_list()
+
     async def _async_update_data(self) -> echoroboticsapi.LastStatuses | None:
         """Fetch data from API endpoint.
 
@@ -127,6 +152,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         # handled by the data update coordinator.
 
         getconfig_task = asyncio.create_task(self._fetch_getconfig())
+        history_task = asyncio.create_task(self._fetch_history())
         async with async_timeout.timeout(10):
             status = await self.api.last_statuses()
             if status is None:
@@ -134,4 +160,5 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
             else:
                 _LOGGER.debug("received state %s", status)
         await getconfig_task
+        await history_task
         return status
