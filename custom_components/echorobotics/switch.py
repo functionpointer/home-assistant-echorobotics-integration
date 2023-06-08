@@ -65,12 +65,12 @@ class EchoRoboticsMainSwitch(EchoRoboticsBaseEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs):
         coord: EchoRoboticsDataUpdateCoordinator = self.coordinator
-        await coord.api.set_mode("work")
         await coord.async_schedule_multiple_refreshes()
+        await coord.api.set_mode("work", use_current=True)
         self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs):
         coord: EchoRoboticsDataUpdateCoordinator = self.coordinator
-        await coord.api.set_mode("chargeAndStay")
         await coord.async_schedule_multiple_refreshes()
+        await coord.api.set_mode("chargeAndStay", use_current=True)
         self.async_write_ha_state()
