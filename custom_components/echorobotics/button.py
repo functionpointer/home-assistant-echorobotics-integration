@@ -73,7 +73,7 @@ class EchoRoboticsSetModeButton(EchoRoboticsBaseEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Press the button."""
-        returncode = await self._api.set_mode(self.raw_mode)
+        returncode = await self._api.set_mode(self.raw_mode, use_current=True)
         if returncode != 200:
             raise ValueError(
                 f"couldn't set mode {self.raw_mode}, api returned {returncode}"

@@ -46,6 +46,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     if not statuses:
         raise EmptyResponse()
+    if len(statuses.statuses_info) != 1:
+        _LOGGER.error(f"no statuses in {statuses}")
+        raise EmptyResponse()
 
     if statuses.statuses_info[0].robot != data["robot_id"]:
         data["robot_id"] = statuses.statuses_info[0].robot
