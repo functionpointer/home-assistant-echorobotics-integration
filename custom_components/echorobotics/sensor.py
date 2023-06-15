@@ -58,6 +58,25 @@ class EchoRoboticsSensor(EchoRoboticsBaseEntity, SensorEntity):
 
 
 class EchoRoboticsStateSensor(EchoRoboticsSensor):
+    NORMALIZE_CASE = {
+        "Offline": "offline",
+        "Alarm": "alarm",
+        "Idle": "idle",
+        "WaitStation": "wait_station",
+        "Charge": "charge",
+        "GoUnloadStation": "go_unload_station",
+        "GoChargeStation": "go_charge_station",
+        "Work": "work",
+        "LeaveStation": "leave_station",
+        "Off": "off",
+        "GoStation": "go_station",
+        "Unknown": "unknown",
+        "Warning": "warning",
+        "Border": "border",
+        "BorderCheck": "border_check",
+        "BorderDiscovery": "border_discovery",
+    }
+
     def __init__(
         self, robot_id: RobotId, coordinator: EchoRoboticsDataUpdateCoordinator
     ):
@@ -66,6 +85,11 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
         self._attr_icon = "mdi:robot-mower"
         self._attr_state_class = None
         self._attr_translation_key = "state_sensor"
+        self._attr_device_class = SensorDeviceClass.ENUM
+
+    @property
+    def options(self) -> list[str] | None:
+        return list(self.NORMALIZE_CASE.values())
 
     def _read_coordinator_data(self) -> None:
         super()._read_coordinator_data()
@@ -73,25 +97,7 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
         if si is None:
             self._attr_native_value = None
         else:
-            normalize_case = {
-                "Offline": "offline",
-                "Alarm": "alarm",
-                "Idle": "idle",
-                "WaitStation": "wait_station",
-                "Charge": "charge",
-                "GoUnloadStation": "go_unload_station",
-                "GoChargeStation": "go_charge_station",
-                "Work": "work",
-                "LeaveStation": "leave_station",
-                "Off": "off",
-                "GoStation": "go_station",
-                "Unknown": "unknown",
-                "Warning": "warning",
-                "Border": "border",
-                "BorderCheck": "border_check",
-                "BorderDiscovery": "border_discovery",
-            }
-            self._attr_native_value = normalize_case.get(si.status, si.status)
+            self._attr_native_value = self.NORMALIZE_CASE.get(si.status, si.status)
 
 
 class EchoRoboticsBatterySensor(EchoRoboticsSensor):
