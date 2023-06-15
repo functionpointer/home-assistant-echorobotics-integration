@@ -1,6 +1,9 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
-![echorobotics_logo](https://brands.home-assistant.io/_/echorobotics/logo@2x.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://brands.home-assistant.io/_/echorobotics/dark_logo@2x.png">
+  <img alt="Echorobotics Logo" src="https://brands.home-assistant.io/_/echorobotics/logo@2x.png">
+</picture>
 
 Echorobotics integration
 ========================
