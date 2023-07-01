@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
+import aiohttp
 import async_timeout
 import echoroboticsapi
 import time
@@ -11,6 +12,7 @@ import time
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -24,7 +26,12 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON, Platform.DEVICE_TRACKER, Platform.SWITCH]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.BUTTON,
+    Platform.DEVICE_TRACKER,
+    Platform.SWITCH,
+]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -151,14 +158,31 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         # Note: asyncio.TimeoutError and aiohttp.ClientError are already
         # handled by the data update coordinator.
 
-        getconfig_task = asyncio.create_task(self._fetch_getconfig())
-        history_task = asyncio.create_task(self._fetch_history())
-        async with async_timeout.timeout(10):
-            status = await self.api.last_statuses()
-            if status is None:
-                _LOGGER.info("received empty update")
+        rng = range(2)
+        for retry_num in rng:
+            try:
+                getconfig_task = asyncio.create_task(self._fetch_getconfig())
+                history_task = asyncio.create_task(self._fetch_history())
+                async with async_timeout.timeout(10):
+                    status = await self.api.last_statuses()
+                    if status is None:
+                        _LOGGER.info("received empty update")
+                    else:
+                        _LOGGER.debug("received state %s", status)
+                await getconfig_task
+                await history_task
+            except aiohttp.ClientResponseError as e:
+                if e.status == 401:
+                    raise ConfigEntryAuthFailed from e
+                else:
+                    raise e
+            except (asyncio.TimeoutError, aiohttp.ClientError) as e:
+                if retry_num == rng[-1]:
+                    raise e
+                else:
+                    _LOGGER.info(
+                        "error fetching echorobotics, retrying in 30s", exc_info=e
+                    )
+                    await asyncio.sleep(30)
             else:
-                _LOGGER.debug("received state %s", status)
-        await getconfig_task
-        await history_task
-        return status
+                return status

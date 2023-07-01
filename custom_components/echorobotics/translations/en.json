@@ -9,6 +9,14 @@
           "user_token": "user token",
           "robot_id": "robot id"
         }
+      },
+      "reauth": {
+        "title": "Login data",
+        "data": {
+          "user_id": "user id",
+          "user_token": "user token",
+          "robot_id": "robot id"
+        }
       }
     },
     "error": {
