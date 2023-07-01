@@ -22,13 +22,15 @@ async def async_setup_entry(
     """Set up the device tracker."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
-        [EchoRoboticsLocation(hass, coordinator=coordinator, robot_id=entry.data["robot_id"])]
+        [
+            EchoRoboticsLocation(
+                hass, coordinator=coordinator, robot_id=entry.data["robot_id"]
+            )
+        ]
     )
 
 
-class EchoRoboticsLocation(
-    EchoRoboticsBaseEntity, TrackerEntity
-):
+class EchoRoboticsLocation(EchoRoboticsBaseEntity, TrackerEntity):
     """Representation of an Echorobotics robot location device tracker."""
 
     def __init__(
