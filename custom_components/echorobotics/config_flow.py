@@ -80,6 +80,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if user_input:
                 return user_input.get(key, None)
             return None
+
         user_data_schema = vol.Schema(
             {
                 vol.Required("user_id", default=get_default("user_id")): str,
@@ -89,9 +90,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         if user_input is None:
-            return self.async_show_form(
-                step_id="user", data_schema=user_data_schema
-            )
+            return self.async_show_form(step_id="user", data_schema=user_data_schema)
 
         errors = {}
         if await self.is_duplicate(user_input):
@@ -151,7 +150,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     data={
                         **existing_entry.data,
                         "user_token": user_input["user_token"],
-                    }
+                    },
                 )
                 await self.hass.config_entries.async_reload(existing_entry.entry_id)
                 return self.async_abort(reason="reauth_successful")
@@ -164,8 +163,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
 
+
 class InvalidAuth(HomeAssistantError):
     """Error to indicate auth fail"""
+
 
 class EmptyResponse(HomeAssistantError):
     """Error to indicate we didn't find the robot."""

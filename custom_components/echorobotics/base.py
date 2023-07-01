@@ -29,7 +29,9 @@ class EchoRoboticsBaseEntity(CoordinatorEntity[EchoRoboticsDataUpdateCoordinator
         self._attr_device_info = DeviceInfo(
             name=robot_id,
             configuration_url=f"https://myrobot.echorobotics.com/fleet-dashboard/robot/{robot_id}",
-            sw_version=coordinator.getconfig_data.data.brain_version if coordinator.getconfig_data else None,
+            sw_version=coordinator.getconfig_data.data.brain_version
+            if coordinator.getconfig_data
+            else None,
             identifiers={(DOMAIN, robot_id)},
             entry_type=None,
             manufacturer="Echorobotics",
