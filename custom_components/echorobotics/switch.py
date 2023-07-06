@@ -1,6 +1,7 @@
 """Platform for switch integration."""
 from __future__ import annotations
 
+import asyncio
 import logging
 
 import echoroboticsapi
@@ -50,27 +51,48 @@ class EchoRoboticsMainSwitch(EchoRoboticsBaseEntity, SwitchEntity):
         self._attr_translation_key = "main_switch"
         self._attr_icon = "mdi:robot-mower"
         self._attr_device_class = SwitchDeviceClass.SWITCH
+        self._pending_mode: echoroboticsapi.Mode | None = None
+
+    def _mode_to_state(self, mode: echoroboticsapi.Mode) -> bool:
+        return mode in ["chargeAndWork", "work"]
 
     @property
     def is_on(self):
         coord: EchoRoboticsDataUpdateCoordinator = self.coordinator
 
-        return coord.smartmode.get_robot_mode() in ["chargeAndWork", "work"]
+        if self._pending_mode is not None:
+            return self._mode_to_state(self._pending_mode)
+
+        return self._mode_to_state(coord.smartmode.get_robot_mode())
 
     @property
     def extra_state_attributes(self):
         return {
             "guessed_mode": self.coordinator.smartmode.get_robot_mode(),
+            "pending_modechange": self._pending_mode or "None",
         }
 
-    async def async_turn_on(self, **kwargs):
+    async def _set_mode(self, mode: echoroboticsapi.Mode):
+        if self._pending_mode is not None:
+            self.logger.warning(
+                f"skip mode_set to {mode}: pending_mode != None ({self._pending_mode})"
+            )
+            return
+
         coord: EchoRoboticsDataUpdateCoordinator = self.coordinator
         await coord.async_schedule_multiple_refreshes()
-        await coord.api.set_mode("work", use_current=True)
-        self.async_write_ha_state()
+        self._pending_mode = mode
+        try:
+            job = asyncio.create_task(coord.api.set_mode(mode, use_current=True))
+            self.async_write_ha_state()
+            async with asyncio.timeout(40):
+                await job
+        finally:
+            self._pending_mode = None
+            self.async_write_ha_state()
+
+    async def async_turn_on(self, **kwargs):
+        await self._set_mode("work")
 
     async def async_turn_off(self, **kwargs):
-        coord: EchoRoboticsDataUpdateCoordinator = self.coordinator
-        await coord.async_schedule_multiple_refreshes()
-        await coord.api.set_mode("chargeAndStay", use_current=True)
-        self.async_write_ha_state()
+        await self._set_mode("chargeAndStay")

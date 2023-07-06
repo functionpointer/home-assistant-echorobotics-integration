@@ -9,7 +9,7 @@
   "integration_type": "device",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/functionpointer/home-assistant-echorobotics-integration/issues",
-  "requirements": ["pyechorobotics==0.0.15"],
+  "requirements": ["pyechorobotics==0.0.16"],
   "ssdp": [],
   "version": "0.0.1",
   "zeroconf": []
