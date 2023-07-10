@@ -158,7 +158,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         # Note: asyncio.TimeoutError and aiohttp.ClientError are already
         # handled by the data update coordinator.
 
-        rng = range(2)
+        rng = range(1)
         for retry_num in rng:
             try:
                 getconfig_task = asyncio.create_task(self._fetch_getconfig())
