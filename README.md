@@ -11,6 +11,8 @@ Echorobotics integration
 Reads status and allows control of Echorobotics robotic lawn mowers, such as the TM-1000, TM-1050, TM-2000 and TM-2050.
 May also support Belrobotics mowers, they seem to be the same thing.
 
+Uses [pyechorobotics](https://github.com/functionpointer/pyechorobotics) under the hood.
+
 Getting the credentials
 =======================
 
