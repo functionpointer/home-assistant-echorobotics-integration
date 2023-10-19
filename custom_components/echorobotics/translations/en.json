@@ -70,7 +70,8 @@
           "warning": "warning",
           "border": "border",
           "border_check": "border check",
-          "border_discovery": "border discovery"
+          "border_discovery": "border discovery",
+          "off_after_alarm": "off after alarm"
         }
       }
     }
