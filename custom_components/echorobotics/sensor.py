@@ -75,6 +75,7 @@ class EchoRoboticsStateSensor(EchoRoboticsSensor):
         "Border": "border",
         "BorderCheck": "border_check",
         "BorderDiscovery": "border_discovery",
+        "OffAfterAlarm": "off_after_alarm",
     }
 
     def __init__(
