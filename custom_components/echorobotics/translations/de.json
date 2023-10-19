@@ -70,7 +70,8 @@
           "warning": "Warnung",
           "border": "Rand",
           "border_check": "Rand Test",
-          "border_discovery": "Rand entdecken"
+          "border_discovery": "Rand entdecken",
+          "off_after_alarm": "Aus nach Alarm"
         }
       }
     }
