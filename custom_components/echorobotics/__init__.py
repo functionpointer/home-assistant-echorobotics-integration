@@ -50,9 +50,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     smartmode = echoroboticsapi.SmartMode(entry.data["robot_id"])
     api.register_smart_mode(smartmode)
+    smartfetch = echoroboticsapi.SmartFetch(
+        api, fetch_history_wait_time=HISTORY_UPDATE_INTERVAL
+    )
     # missing: validate api connection
 
-    coordinator = EchoRoboticsDataUpdateCoordinator(hass, api, smartmode)
+    coordinator = EchoRoboticsDataUpdateCoordinator(hass, api, smartmode, smartfetch)
     hass.data[DOMAIN][entry.entry_id] = coordinator
     await coordinator.async_config_entry_first_refresh()
 
@@ -73,7 +76,11 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
     """My custom coordinator."""
 
     def __init__(
-        self, hass, api: echoroboticsapi.Api, smartmode: echoroboticsapi.SmartMode
+        self,
+        hass,
+        api: echoroboticsapi.Api,
+        smartmode: echoroboticsapi.SmartMode,
+        smartfetch: echoroboticsapi.SmartFetch,
     ):
         """Initialize my coordinator."""
         super().__init__(
@@ -84,6 +91,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         )
         self.api = api
         self.smartmode = smartmode
+        self.smartfetch = smartfetch
 
         self.history_tstamp: int = 0
 
@@ -105,9 +113,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
             for si in laststatuses.statuses_info:
                 if si.robot == robot_id:
                     return si
-            self.logger.warning(
-                "robot_id %s not found in %s", self.robot_id, laststatuses
-            )
+            self.logger.warning("robot_id %s not found in %s", robot_id, laststatuses)
         return None
 
     async def _fetch_getconfig(self):
@@ -138,17 +144,6 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
                 self.getconfig_data = newdata
                 self.getconfig_tstamp = time.time()
 
-    async def _fetch_history(self) -> None:
-        time_to_fetch = (
-            time.time() > self.history_tstamp + HISTORY_UPDATE_INTERVAL.total_seconds()
-        )
-
-        if time_to_fetch:
-            async with async_timeout.timeout(10):
-                self.history_tstamp = time.time()
-                _LOGGER.debug("fetching history")
-                await self.api.history_list()
-
     async def _async_update_data(self) -> echoroboticsapi.LastStatuses | None:
         """Fetch data from API endpoint.
 
@@ -162,15 +157,13 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         for retry_num in rng:
             try:
                 getconfig_task = asyncio.create_task(self._fetch_getconfig())
-                history_task = asyncio.create_task(self._fetch_history())
                 async with async_timeout.timeout(10):
-                    status = await self.api.last_statuses()
+                    status = await self.smartfetch.smart_fetch()
                     if status is None:
                         _LOGGER.info("received empty update")
                     else:
                         _LOGGER.debug("received state %s", status)
                 await getconfig_task
-                await history_task
             except aiohttp.ClientResponseError as e:
                 if e.status == 401:
                     raise ConfigEntryAuthFailed from e
