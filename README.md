@@ -13,6 +13,15 @@ May also support Belrobotics mowers, they seem to be the same thing.
 
 Uses [pyechorobotics](https://github.com/functionpointer/pyechorobotics) under the hood.
 
+Installation
+============
+
+Install like any other HACS custom repository.
+1. Install [HACS](https://hacs.xyz/)
+2. Add this repo as a custom repository: https://hacs.xyz/docs/faq/custom_repositories/
+3. The integration should show up in HACS. Install it. Restart HA.
+4. Go into your [integrations](https://my.home-assistant.io/redirect/integrations/) and add Echorobotics.
+
 Getting the credentials
 =======================
 
