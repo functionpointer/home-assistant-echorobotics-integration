@@ -2,7 +2,7 @@ import logging
 
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.components.device_tracker import SOURCE_TYPE_GPS
+from homeassistant.components.device_tracker import SourceType
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -71,7 +71,7 @@ class EchoRoboticsLocation(EchoRoboticsBaseEntity, TrackerEntity):
     @property
     def source_type(self):
         """Return device tracker source type."""
-        return SOURCE_TYPE_GPS
+        return SourceType.GPS
 
     @property
     def force_update(self):
