@@ -1,4 +1,5 @@
 """Platform for button integration."""
+
 from __future__ import annotations
 
 import logging
@@ -67,18 +68,9 @@ class EchoRoboticsSetModeButton(EchoRoboticsBaseEntity, ButtonEntity):
         self._attr_unique_id = f"{robot_id}-{mode}"
         self._attr_icon = self.iconmap.get(mode, None)
 
-    @property
-    def _api(self) -> echoroboticsapi.Api:
-        return self.coordinator.api
-
     async def async_press(self) -> None:
         """Press the button."""
-        returncode = await self._api.set_mode(self.raw_mode, use_current=True)
-        if returncode != 200:
-            raise ValueError(
-                f"couldn't set mode {self.raw_mode}, api returned {returncode}"
-            )
-        await self.coordinator.async_schedule_multiple_refreshes()
+        await self._set_mode(self.raw_mode)
 
 
 class EchoRoboticsForceDataUpdateButton(EchoRoboticsBaseEntity, ButtonEntity):

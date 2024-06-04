@@ -1,4 +1,5 @@
 """The echorobotics integration."""
+
 from __future__ import annotations
 
 import asyncio
@@ -31,6 +32,7 @@ PLATFORMS: list[Platform] = [
     Platform.BUTTON,
     Platform.DEVICE_TRACKER,
     Platform.SWITCH,
+    Platform.LAWN_MOWER,
 ]
 
 
@@ -97,6 +99,13 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
 
         self.getconfig_data: echoroboticsapi.GetConfig | None = None
         self.getconfig_tstamp: int = 0
+
+        self.pending_mode: echoroboticsapi.Mode | None = None
+        """pending_mode used for improved handling of echorobotics long response time
+        
+        when an entity (button, switch or lawn_mower) calls for a mode change (_set_mode),
+        more info see EchoRoboticsBaseEntity._set_mode
+        """
 
     async def async_schedule_multiple_refreshes(self):
         async def refresh_later(sleep: float):

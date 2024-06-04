@@ -29,6 +29,16 @@
     }
   },
 "entity": {
+    "switch": {
+      "auto_mow_switch": {
+        "name": "mow automatically"
+      }
+    },
+    "lawn_mower": {
+      "lawn_mower": {
+        "name": "Lawn mower"
+      }
+    },
     "device_tracker": {
       "location": {
         "name": "Location"
