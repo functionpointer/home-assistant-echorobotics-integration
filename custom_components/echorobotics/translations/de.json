@@ -29,6 +29,16 @@
     }
   },
   "entity": {
+    "switch": {
+      "auto_mow_switch": {
+        "name": "automatisch mähen"
+      }
+    },
+    "lawn_mower": {
+      "lawn_mower": {
+        "name": "Rasenmäher"
+      }
+    },
     "device_tracker": {
       "location": {
         "name": "Position"
