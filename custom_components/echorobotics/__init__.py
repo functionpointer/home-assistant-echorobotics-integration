@@ -16,6 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers import device_registry, entity_registry
 
 from .const import (
     DOMAIN,
@@ -72,6 +73,38 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Migrate old entry."""
+    _LOGGER.debug("Migrating from version %s", config_entry.version)
+
+    if config_entry.version > 2:
+        # no downgrades from future versions
+        return False
+
+    if config_entry.version == 1:
+        robot_id = config_entry.data["robot_id"]
+        # -main-switch was renamed to -auto-mow-switch
+        old_unique_id = f"{robot_id}-main-switch"
+        new_unique_id = f"{robot_id}-auto-mow-switch"
+        ent_reg = entity_registry.async_get(hass)
+        auto_mow_switch_entity_id = ent_reg.async_get_entity_id(
+            Platform.SWITCH, DOMAIN, old_unique_id
+        )
+        ent_reg.async_update_entity(
+            auto_mow_switch_entity_id, new_unique_id=new_unique_id
+        )
+        _LOGGER.debug(
+            "Migrating unique_id from [%s] to [%s]",
+            old_unique_id,
+            new_unique_id,
+        )
+        hass.config_entries.async_update_entry(config_entry, version=2)
+        _LOGGER.info("Migration to version %s successful", config_entry.version)
+        return True
+
+    return False
 
 
 class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
