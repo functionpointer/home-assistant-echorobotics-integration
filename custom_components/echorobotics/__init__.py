@@ -94,20 +94,22 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             Platform.SWITCH, DOMAIN, old_unique_id
         )
         new_entity_id = (
-            f"{robot_id}_auto_mow"
+            auto_mow_switch_entity_id.replace("_none", "_auto_mow")
             if auto_mow_switch_entity_id.lower().endswith("_none")
             else UNDEFINED
+        )
+        _LOGGER.info(
+            "Migrating unique_id from [%s] to [%s] and new entity_id [%s]",
+            old_unique_id,
+            new_unique_id,
+            new_entity_id,
         )
         ent_reg.async_update_entity(
             auto_mow_switch_entity_id,
             new_unique_id=new_unique_id,
             new_entity_id=new_entity_id,
         )
-        _LOGGER.debug(
-            "Migrating unique_id from [%s] to [%s]",
-            old_unique_id,
-            new_unique_id,
-        )
+
         hass.config_entries.async_update_entry(config_entry, version=2)
         _LOGGER.info("Migration to version %s successful", config_entry.version)
         return True
