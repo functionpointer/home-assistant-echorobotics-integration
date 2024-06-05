@@ -25,6 +25,7 @@ from .const import (
     RobotId,
     GETCONFIG_UPDATE_INTERVAL,
     HISTORY_UPDATE_INTERVAL,
+    UNAVAILABLE_TIMEOUT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -142,6 +143,8 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
 
         self.getconfig_data: echoroboticsapi.GetConfig | None = None
         self.getconfig_tstamp: int = 0
+        self.laststatuses_data: echoroboticsapi.LastStatuses | None = None
+        self.laststatuses_tstamp: int = 0
 
         self.pending_mode: echoroboticsapi.Mode | None = None
         """pending_mode used for improved handling of echorobotics long response time
@@ -157,11 +160,16 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
             await self.async_request_refresh()
 
         for sleeptime in [2, 10, 20, 40, 60]:
-            asyncio.create_task(refresh_later(sleeptime))
+            task = asyncio.create_task(refresh_later(sleeptime))
 
     def get_status_info(self, robot_id: RobotId) -> echoroboticsapi.StatusInfo | None:
-        if self.data:
-            laststatuses: echoroboticsapi.models.LastStatuses = self.data
+        too_old: bool = (
+            time.monotonic()
+            > self.laststatuses_tstamp + UNAVAILABLE_TIMEOUT.total_seconds()
+        )
+
+        if self.laststatuses_data is not None and not too_old:
+            laststatuses: echoroboticsapi.models.LastStatuses = self.laststatuses_data
             for si in laststatuses.statuses_info:
                 if si.robot == robot_id:
                     return si
@@ -171,7 +179,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
     async def _fetch_getconfig(self):
         """Fetch getconfig from robot, but not on every update"""
         time_to_fetch = (
-            time.time()
+            time.monotonic()
             > self.getconfig_tstamp + GETCONFIG_UPDATE_INTERVAL.total_seconds()
         )
 
@@ -194,9 +202,9 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
                 _LOGGER.debug("could not getconfig")
             else:
                 self.getconfig_data = newdata
-                self.getconfig_tstamp = time.time()
+                self.getconfig_tstamp = time.monotonic()
 
-    async def _async_update_data(self) -> echoroboticsapi.LastStatuses | None:
+    async def _async_update_data(self) -> float:
         """Fetch data from API endpoint.
 
         This is the place to pre-process the data to lookup tables
@@ -205,29 +213,22 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         # Note: asyncio.TimeoutError and aiohttp.ClientError are already
         # handled by the data update coordinator.
 
-        rng = range(1)
-        for retry_num in rng:
-            try:
-                getconfig_task = asyncio.create_task(self._fetch_getconfig())
-                async with async_timeout.timeout(10):
-                    status = await self.smartfetch.smart_fetch()
-                    if status is None:
-                        _LOGGER.info("received empty update")
-                    else:
-                        _LOGGER.debug("received state %s", status)
-                await getconfig_task
-            except aiohttp.ClientResponseError as e:
-                if e.status == 401:
-                    raise ConfigEntryAuthFailed from e
+        try:
+            getconfig_task = asyncio.create_task(self._fetch_getconfig())
+            async with async_timeout.timeout(5):
+                status = await self.smartfetch.smart_fetch()
+                if status is None:
+                    _LOGGER.info("received empty update")
                 else:
-                    raise e
-            except (asyncio.TimeoutError, aiohttp.ClientError) as e:
-                if retry_num == rng[-1]:
-                    raise e
-                else:
-                    _LOGGER.info(
-                        "error fetching echorobotics, retrying in 30s", exc_info=e
-                    )
-                    await asyncio.sleep(30)
+                    _LOGGER.debug("received state %s", status)
+            await getconfig_task
+        except aiohttp.ClientResponseError as e:
+            if e.status == 401:
+                raise ConfigEntryAuthFailed from e
             else:
-                return status
+                _LOGGER.warning(f"failed to fetch update {e}")
+                raise e
+        else:
+            self.laststatuses_data = status
+            self.laststatuses_tstamp = time.monotonic()
+            return self.laststatuses_tstamp

@@ -56,10 +56,6 @@ class EchoRoboticsBaseEntity(CoordinatorEntity[EchoRoboticsDataUpdateCoordinator
         return self.coordinator.get_status_info(self.robot_id)
 
     @property
-    def _api(self) -> echoroboticsapi.Api:
-        return self.coordinator.api
-
-    @property
     def pending_mode(self) -> echoroboticsapi.Mode | None:
         return self.coordinator.pending_mode
 
