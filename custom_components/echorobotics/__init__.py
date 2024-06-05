@@ -15,6 +15,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from homeassistant.helpers.typing import UNDEFINED
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers import device_registry, entity_registry
 
@@ -92,8 +93,15 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         auto_mow_switch_entity_id = ent_reg.async_get_entity_id(
             Platform.SWITCH, DOMAIN, old_unique_id
         )
+        new_entity_id = (
+            f"{robot_id}_auto_mow"
+            if auto_mow_switch_entity_id.lower().endswith("_none")
+            else UNDEFINED
+        )
         ent_reg.async_update_entity(
-            auto_mow_switch_entity_id, new_unique_id=new_unique_id
+            auto_mow_switch_entity_id,
+            new_unique_id=new_unique_id,
+            new_entity_id=new_entity_id,
         )
         _LOGGER.debug(
             "Migrating unique_id from [%s] to [%s]",

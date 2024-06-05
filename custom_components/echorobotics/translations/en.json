@@ -31,12 +31,12 @@
 "entity": {
     "switch": {
       "auto_mow_switch": {
-        "name": "mow automatically"
+        "name": "auto mow"
       }
     },
     "lawn_mower": {
       "lawn_mower": {
-        "name": "Lawn mower"
+        "name": "[%key:component::lawn_mower::title%]"
       }
     },
     "device_tracker": {
