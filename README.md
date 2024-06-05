@@ -33,8 +33,8 @@ Switch, guessed_mode and optimistic
 
 The ``sensor`` and ``button`` entities are directly connected to the robot, without any special sauce.
 
-By contrast, the ``switch`` entity is smart.
-The fundamental challenge comes from the fact that the API does not report the operating mode ("work", "chargeAndWork", "chargeAndStay") of the robot,.
+By contrast, the auto-mow ``switch`` entity is smart.
+The fundamental challenge comes from the fact that the API does not report the operating mode ("work", "chargeAndWork", "chargeAndStay") of the robot.
 We can take a guess though, which is implemented by the smart_mode feature of pyechorobotics.
 
 The Switch state depends on smart_mode. When toggling the switch, we have to wait for up to 25s until a response from the robot comes (use_current feature of pyechorobotics).
@@ -49,3 +49,7 @@ If the response is negative, the switch state changes back, and the attribute is
 
 This behaviour is particularly suited for a good visual indication using a [custom button card](https://github.com/custom-cards/button-card).
 
+The ``lawn_mower`` entity maps the state ``sensor`` to homeassistant's built-in LawnMowerActivities ``MOWING``, ``DOCKED`` and ``ERROR``.
+While docked, the entity does not tell you if the robot will start mowing again after charging completes.
+For that, use the state from the auto-mow switch described above.
+Pressing ``MOW`` or ``DOCK`` is equivalent to the button entities ``WORK`` and ``CHARGE AND STAY``.
