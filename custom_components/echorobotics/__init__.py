@@ -26,6 +26,7 @@ from .const import (
     GETCONFIG_UPDATE_INTERVAL,
     HISTORY_UPDATE_INTERVAL,
     UNAVAILABLE_TIMEOUT,
+    UNAVAILABLE_FETCHES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -145,6 +146,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         self.getconfig_tstamp: int = 0
         self.laststatuses_data: echoroboticsapi.LastStatuses | None = None
         self.laststatuses_tstamp: int = 0
+        self.fetch_fail_count: int = 0
 
         self.pending_mode: echoroboticsapi.Mode | None = None
         """pending_mode used for improved handling of echorobotics long response time
@@ -167,8 +169,10 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
             time.monotonic()
             > self.laststatuses_tstamp + UNAVAILABLE_TIMEOUT.total_seconds()
         )
+        too_many_fetches_failed: bool = self.fetch_fail_count >= UNAVAILABLE_FETCHES
+        should_be_unavailable = too_many_fetches_failed and too_old
 
-        if self.laststatuses_data is not None and not too_old:
+        if self.laststatuses_data is not None and (not should_be_unavailable):
             laststatuses: echoroboticsapi.models.LastStatuses = self.laststatuses_data
             for si in laststatuses.statuses_info:
                 if si.robot == robot_id:
@@ -229,6 +233,9 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
                 _LOGGER.warning(f"failed to fetch update {e}")
                 raise e
         else:
+            self.fetch_fail_count = -1  # will be set to 0 by finally
             self.laststatuses_data = status
             self.laststatuses_tstamp = time.monotonic()
             return self.laststatuses_tstamp
+        finally:
+            self.fetch_fail_count += 1
