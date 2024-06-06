@@ -51,6 +51,13 @@ custom-button-card example
 ==========================
 
 The previously described behaviour particularly suited for a good visual indication using a [custom button card](https://github.com/custom-cards/button-card).
+Turning on             |  On
+:-------------------------:|:-------------------------:
+![grafik](https://github.com/functionpointer/home-assistant-echorobotics-integration/assets/9073578/acae9a8f-8809-43b1-95c4-51a756423e02)  |  ![grafik](https://github.com/functionpointer/home-assistant-echorobotics-integration/assets/9073578/de8388b1-cdf3-4d33-a891-b2f2b991ea14)
+
+
+
+
 Example:
 ````
 type: custom:button-card
