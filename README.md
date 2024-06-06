@@ -47,7 +47,59 @@ Once the response comes, the state is changed again:
 If the response is positive, the attribute will be cleared ("None").
 If the response is negative, the switch state changes back, and the attribute is cleared.
 
-This behaviour is particularly suited for a good visual indication using a [custom button card](https://github.com/custom-cards/button-card).
+custom-button-card example
+==========================
+
+The previously described behaviour particularly suited for a good visual indication using a [custom button card](https://github.com/custom-cards/button-card).
+Example:
+````
+type: custom:button-card
+entity: switch.eepm000715
+color_type: icon
+tap_action:
+  action: toggle
+hold_action:
+  action: none
+double_tap_action:
+  action: none
+show_state: true
+state:
+  - operator: template
+    value: >-
+      [[[ return entity.attributes.pending_modechange === "work"
+      || entity.attributes.pending_modechange ===
+      "chargeAndWork" ]]]
+    color: var(--deep-orange-color)
+    state_display: Turning on...
+    icon: mdi:satellite-uplink
+  - operator: template
+    value: >-
+      [[[ return entity.attributes.pending_modechange ===
+      "chargeAndStay" ]]]
+    color: var(--deep-orange-color)
+    state_display: Turning off...
+    icon: mdi:satellite-uplink
+  - value: 'on'
+    color: var(--state-switch-active-color)
+    state_display: On
+  - value: 'off'
+    color: var(--paper-item-icon-color)
+    state_display: Off
+show_label: true
+name: Robot lawn mower
+size: 100%
+styles:
+  card:
+    - height: 230px
+  label:
+    - text-overflow: visible
+    - white-space: normal
+    - overflow: visible
+    - margin-top: 10px
+````
+
+lawn_mower entity
+=================
 
 The ``lawn_mower`` entity maps the state ``sensor`` to homeassistant's built-in LawnMowerActivities ``MOWING``, ``DOCKED`` and ``ERROR``.
 While docked, the entity does not tell you if the robot will start mowing again after charging completes.
