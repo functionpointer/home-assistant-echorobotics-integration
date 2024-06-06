@@ -53,3 +53,8 @@ The ``lawn_mower`` entity maps the state ``sensor`` to homeassistant's built-in 
 While docked, the entity does not tell you if the robot will start mowing again after charging completes.
 For that, use the state from the auto-mow switch described above.
 Pressing ``MOW`` or ``DOCK`` is equivalent to the button entities ``WORK`` and ``CHARGE AND STAY``.
+
+Hacking
+=======
+
+See [hacking.md](hacking.md)
