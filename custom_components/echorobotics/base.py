@@ -38,6 +38,10 @@ class EchoRoboticsBaseEntity(CoordinatorEntity[EchoRoboticsDataUpdateCoordinator
         self._read_coordinator_data()
 
     @property
+    def available(self) -> bool:
+        return bool(self.status_info)
+
+    @property
     def attribution(self):
         return "echorobotics.com"
 
@@ -48,7 +52,7 @@ class EchoRoboticsBaseEntity(CoordinatorEntity[EchoRoboticsDataUpdateCoordinator
         self.async_write_ha_state()
 
     def _read_coordinator_data(self) -> None:
-        self._attr_available = bool(self.status_info)
+        pass
 
     @property
     def status_info(self) -> echoroboticsapi.StatusInfo:
