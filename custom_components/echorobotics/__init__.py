@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import random
 
 import aiohttp
 import async_timeout
@@ -164,20 +165,22 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         for sleeptime in [2, 10, 20, 40, 60]:
             task = asyncio.create_task(refresh_later(sleeptime))
 
-    def get_status_info(self, robot_id: RobotId) -> echoroboticsapi.StatusInfo | None:
+    def _should_be_unavailable(self):
         too_old: bool = (
             time.monotonic()
             > self.laststatuses_tstamp + UNAVAILABLE_TIMEOUT.total_seconds()
         )
         too_many_fetches_failed: bool = self.fetch_fail_count >= UNAVAILABLE_FETCHES
         should_be_unavailable = too_many_fetches_failed and too_old
+        return should_be_unavailable
 
-        if self.laststatuses_data is not None and (not should_be_unavailable):
+    def get_status_info(self, robot_id: RobotId) -> echoroboticsapi.StatusInfo | None:
+        if self.laststatuses_data is not None and (not self._should_be_unavailable()):
             laststatuses: echoroboticsapi.models.LastStatuses = self.laststatuses_data
             for si in laststatuses.statuses_info:
                 if si.robot == robot_id:
                     return si
-            self.logger.warning("robot_id %s not found in %s", robot_id, laststatuses)
+            _LOGGER.warning("robot_id %s not found in %s", robot_id, laststatuses)
         return None
 
     async def _fetch_getconfig(self):
@@ -208,34 +211,74 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
                 self.getconfig_data = newdata
                 self.getconfig_tstamp = time.monotonic()
 
-    async def _async_update_data(self) -> float:
+    async def _async_update_data(self) -> bool:
         """Fetch data from API endpoint.
 
-        This is the place to pre-process the data to lookup tables
-        so entities can quickly look up their data.
-        """
-        # Note: asyncio.TimeoutError and aiohttp.ClientError are already
-        # handled by the data update coordinator.
+        We don't actually use the return value of this
+        Data is actually stored in self.getconfig_data and self.laststatuses_data
 
+        This integration has a smart way of handling transient errors.
+        Instead of going unavailable immediately, we stay available for a limited time.
+        It is specified by self._should_be_unavailable()
+
+        Every fetch operation either results in success or failure.
+        We update the base variables behind self._should_be_unavailable().
+        If we got a result, we return True.
+        If we got a fail but should be available, we return False.
+        If we got a fail but should not be available, re re-raise the error.
+
+        Every return causes entities to be updated, which decide their own availability based on BaseEchoRoboticsEntity::available().
+        The first re-raised error does that too. Consecutive ones do not.
+        """
+
+        exception = None
         try:
-            getconfig_task = asyncio.create_task(self._fetch_getconfig())
-            async with async_timeout.timeout(5):
-                status = await self.smartfetch.smart_fetch()
-                if status is None:
-                    _LOGGER.info("received empty update")
-                else:
-                    _LOGGER.debug("received state %s", status)
-            await getconfig_task
+
+            async def _smartfetch():
+                async with async_timeout.timeout(5):
+                    status = await self.smartfetch.smart_fetch()
+                    if status is None:
+                        _LOGGER.info("received empty update")
+                    else:
+                        _LOGGER.debug("received state %s", status)
+                    return status
+
+            fetch_result, status = await asyncio.gather(
+                self._fetch_getconfig(), _smartfetch(), return_exceptions=True
+            )
+
+            if isinstance(fetch_result, Exception):
+                raise fetch_result
+            if isinstance(status, Exception):
+                raise status
         except aiohttp.ClientResponseError as e:
             if e.status == 401:
                 raise ConfigEntryAuthFailed from e
             else:
-                _LOGGER.warning(f"failed to fetch update {e}")
-                raise e
+                exception = e
+        except asyncio.TimeoutError as e:
+            exception = e
         else:
             self.fetch_fail_count = -1  # will be set to 0 by finally
             self.laststatuses_data = status
             self.laststatuses_tstamp = time.monotonic()
-            return self.laststatuses_tstamp
         finally:
             self.fetch_fail_count += 1
+
+        if self._should_be_unavailable():
+            if self.last_update_success:
+                _LOGGER.info(
+                    "fetch failure, going unavailable (count=%s)",
+                    self.fetch_fail_count,
+                    exc_info=exception,
+                )
+            raise exception
+        else:
+            ret = exception is None
+            if not ret:
+                _LOGGER.info(
+                    "fetch failure, staying available for now (count=%s)",
+                    self.fetch_fail_count,
+                    exc_info=exception,
+                )
+            return ret
