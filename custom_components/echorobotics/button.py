@@ -87,3 +87,7 @@ class EchoRoboticsForceDataUpdateButton(EchoRoboticsBaseEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         await self.coordinator.async_request_refresh()
+
+    @property
+    def available(self) -> bool:
+        return True
