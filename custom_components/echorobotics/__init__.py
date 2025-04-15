@@ -233,6 +233,24 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
 
         exception = None
         try:
+            async with async_timeout.timeout(1):
+                await self.api.current()
+        except aiohttp.ClientResponseError as e:
+            if e.status == 401:
+                raise ConfigEntryAuthFailed from e
+            else:
+                exception = e
+        except asyncio.TimeoutError as e:
+            exception = e
+
+        if exception is not None:
+            _LOGGER.info(
+                "current() failure",
+                exc_info=exception,
+            )
+
+        exception = None
+        try:
 
             async def _smartfetch():
                 async with async_timeout.timeout(5):
