@@ -11,3 +11,7 @@ Drafting a release
 2. [Draft a new release](https://github.com/functionpointer/home-assistant-echorobotics-integration/releases/new) on GitHub  
     Choose vX.X.X as tag name, and type the changelog in
 
+Installing a branch using HACS
+==============================
+
+See https://hacs.xyz/docs/use/entities/update/#install-action
