@@ -90,7 +90,7 @@ state:
     color: var(--state-switch-active-color)
     state_display: On
   - value: 'off'
-    color: var(--paper-item-icon-color)
+    color: var(--state-inactive-color)
     state_display: Off
 show_label: true
 name: Robot lawn mower
