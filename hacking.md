@@ -3,6 +3,19 @@ Hacking
 
 Contains some developer documentation
 
+Debug logs
+==========
+
+Add this to your configuration.yaml
+
+````
+logger:
+  default: info
+  logs:
+    custom_components.echorobotics: debug
+    echoroboticsapi: debug
+````
+
 
 Drafting a release
 ==================

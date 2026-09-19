@@ -49,11 +49,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api = echoroboticsapi.Api(
         websession=async_create_clientsession(
             hass,
-            cookies=echoroboticsapi.create_cookies(
-                user_id=entry.data["user_id"], user_token=entry.data["user_token"]
-            ),
         ),
         robot_ids=[entry.data["robot_id"]],
+        email=entry.data["user_email"],
+        password=entry.data["user_password"],
     )
     smartmode = echoroboticsapi.SmartMode(entry.data["robot_id"])
     api.register_smart_mode(smartmode)
@@ -83,9 +82,18 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     """Migrate old entry."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
-    if config_entry.version > 2:
+    if config_entry.version > 3:
         # no downgrades from future versions
         return False
+
+    if config_entry.version == 2:
+        new_data = {**config_entry.data, "user_email": "", "user_password": ""}
+        new_data.pop("user_id", None)
+        new_data.pop("user_token", None)
+
+        hass.config_entries.async_update_entry(config_entry, data=new_data, version=3)
+        _LOGGER.info("Migration to version %s successful", config_entry.version)
+        return True
 
     if config_entry.version == 1:
         robot_id = config_entry.data["robot_id"]

@@ -5,16 +5,16 @@
       "user": {
         "title": "Logindaten",
         "data": {
-          "user_id": "user id",
-          "user_token": "user token",
+          "user_email": "E-Mail-Adresse",
+          "user_password": "Kennwort",
           "robot_id": "robot id"
         }
       },
       "reauth": {
         "title": "Logindaten",
         "data": {
-          "user_id": "user id",
-          "user_token": "user token",
+          "user_email": "E-Mail-Adresse",
+          "user_password": "Kennwort",
           "robot_id": "robot id"
         }
       }
@@ -25,7 +25,8 @@
       "unknown": "Unbekannter Fehler"
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "Gerät ist bereits konfiguriert",
+      "reauth_successful": "Reauthentifizierung erfolgreich"
     }
   },
   "entity": {
@@ -60,7 +61,7 @@
     },
     "sensor": {
       "battery_sensor": {
-        "name": "[%key:component::sensor::entity_component::battery::name%]"
+        "name": "Batterie"
       },
       "state_sensor": {
         "name": "Status",

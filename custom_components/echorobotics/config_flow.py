@@ -25,7 +25,8 @@ _LOGGER = logging.getLogger(__name__)
 
 STEP_REAUTH_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required("user_token"): str,
+        vol.Required("user_email"): str,
+        vol.Required("user_password"): str,
     }
 )
 
@@ -39,11 +40,10 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     api = echoroboticsapi.Api(
         websession=async_create_clientsession(
             hass,
-            cookies=echoroboticsapi.create_cookies(
-                user_id=data["user_id"], user_token=data["user_token"]
-            ),
         ),
         robot_ids=[data["robot_id"]],
+        email=data["user_email"],
+        password=data["user_password"],
     )
     try:
         statuses = await api.last_statuses()
@@ -70,7 +70,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for echorobotics."""
 
-    VERSION = 2
+    VERSION = 3
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -84,8 +84,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         user_data_schema = vol.Schema(
             {
-                vol.Required("user_id", default=get_default("user_id")): str,
-                vol.Required("user_token", default=get_default("user_token")): str,
+                vol.Required("user_email", default=get_default("user_email")): str,
+                vol.Required("user_password", default=get_default("user_password")): str,
                 vol.Required("robot_id", default=get_default("robot_id")): str,
             }
         )
@@ -132,7 +132,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
         errors = {}
         if user_input is not None:
-            user_input["user_id"] = existing_entry.data["user_id"]
             user_input["robot_id"] = existing_entry.data["robot_id"]
             try:
                 user_input = await validate_input(self.hass, user_input)
@@ -150,7 +149,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     existing_entry,
                     data={
                         **existing_entry.data,
-                        "user_token": user_input["user_token"],
+                        "user_email": user_input["user_email"],
+                        "user_password": user_input["user_password"],
                     },
                 )
                 await self.hass.config_entries.async_reload(existing_entry.entry_id)

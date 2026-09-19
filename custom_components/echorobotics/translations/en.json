@@ -5,27 +5,28 @@
       "user": {
         "title": "Login data",
         "data": {
-          "user_id": "user id",
-          "user_token": "user token",
+          "user_email": "E-Mail address",
+          "user_password": "Password",
           "robot_id": "robot id"
         }
       },
       "reauth": {
         "title": "Login data",
         "data": {
-          "user_id": "user id",
-          "user_token": "user token",
+          "user_email": "E-Mail address",
+          "user_password": "Password",
           "robot_id": "robot id"
         }
       }
     },
     "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid Authentication",
+      "unknown": "Unexpected error"
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "Device is already configured",
+      "reauth_successful": "Reauthentication successful"
     }
   },
 "entity": {
@@ -36,7 +37,7 @@
     },
     "lawn_mower": {
       "lawn_mower": {
-        "name": "[%key:component::lawn_mower::title%]"
+        "name": "Lawn mower"
       }
     },
     "device_tracker": {
@@ -60,7 +61,7 @@
     },
     "sensor": {
       "battery_sensor": {
-        "name": "[%key:component::sensor::entity_component::battery::name%]"
+        "name": "Battery"
       },
       "state_sensor": {
         "name": "State",
