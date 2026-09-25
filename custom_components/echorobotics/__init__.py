@@ -20,6 +20,7 @@ from homeassistant.helpers.typing import UNDEFINED
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers import device_registry, entity_registry
 
+from . import repairs
 from .const import (
     DOMAIN,
     UPDATE_INTERVAL,
@@ -61,7 +62,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     # missing: validate api connection
 
-    coordinator = EchoRoboticsDataUpdateCoordinator(hass, api, smartmode, smartfetch)
+    coordinator = EchoRoboticsDataUpdateCoordinator(
+        hass, entry.entry_id, api, smartmode, smartfetch
+    )
     hass.data[DOMAIN][entry.entry_id] = coordinator
     await coordinator.async_config_entry_first_refresh()
 
@@ -134,6 +137,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass,
+        entry_id: str,
         api: echoroboticsapi.Api,
         smartmode: echoroboticsapi.SmartMode,
         smartfetch: echoroboticsapi.SmartFetch,
@@ -148,6 +152,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         self.api = api
         self.smartmode = smartmode
         self.smartfetch = smartfetch
+        self._entry_id = entry_id
 
         self.history_tstamp: int = 0
 
@@ -245,11 +250,26 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
                 await self.api.current()
         except aiohttp.ClientResponseError as e:
             if e.status == 401:
-                raise ConfigEntryAuthFailed from e
+                # 401 can happen on wrong password
+                # or on missing subscription
+                auth_works = False
+                async with async_timeout.timeout(10):
+                    auth_works = len(await self.api.get_access_token()) > 10
+                if auth_works:
+                    repairs.async_create_paid_subscription_issue(
+                        self.hass, self._entry_id
+                    )
+                    exception = e
+                else:
+                    raise ConfigEntryAuthFailed from e
             else:
                 exception = e
         except asyncio.TimeoutError as e:
             exception = e
+        else:
+            repairs.async_delete_paid_subscription_issue(
+                self.hass, self._entry_id
+            )
 
         if exception is not None:
             _LOGGER.info(

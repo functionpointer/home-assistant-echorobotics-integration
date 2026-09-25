@@ -29,7 +29,13 @@
       "reauth_successful": "Reauthentication successful"
     }
   },
-"entity": {
+  "issues": {
+    "paid_subscription_required": {
+      "title": "Paid subscription required",
+      "description": "The Echorobotics account credentials are valid, but the robot data endpoint is returning an authorization error. This usually means the account does not have an active paid subscription. Please check your Echorobotics subscription."
+    }
+  },
+  "entity": {
     "switch": {
       "auto_mow_switch": {
         "name": "auto mow"

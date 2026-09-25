@@ -29,6 +29,12 @@
       "reauth_successful": "Reauthentifizierung erfolgreich"
     }
   },
+  "issues": {
+    "paid_subscription_required": {
+      "title": "Kostenpflichtiges Abonnement erforderlich",
+      "description": "Die Zugangsdaten des Echorobotics-Kontos sind gültig, aber der Roboterdaten-Endpunkt gibt einen Autorisierungsfehler zurück. Dies bedeutet normalerweise, dass für das Konto kein aktives kostenpflichtiges Abonnement vorhanden ist. Bitte prüfe dein Echorobotics-Abonnement."
+    }
+  },
   "entity": {
     "switch": {
       "auto_mow_switch": {
