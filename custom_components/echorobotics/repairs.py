@@ -15,9 +15,7 @@ def _issue_id(entry_id: str) -> str:
     return f"{entry_id}{PAID_SUBSCRIPTION_ISSUE_SUFFIX}"
 
 
-def async_create_paid_subscription_issue(
-    hass: HomeAssistant, entry_id: str
-) -> None:
+def async_create_paid_subscription_issue(hass: HomeAssistant, entry_id: str) -> None:
     """Create a repair issue for a missing paid subscription."""
     ir.async_create_issue(
         hass,
@@ -29,8 +27,6 @@ def async_create_paid_subscription_issue(
     )
 
 
-def async_delete_paid_subscription_issue(
-    hass: HomeAssistant, entry_id: str
-) -> None:
+def async_delete_paid_subscription_issue(hass: HomeAssistant, entry_id: str) -> None:
     """Delete the repair issue for a missing paid subscription, if present."""
     ir.async_delete_issue(hass, DOMAIN, _issue_id(entry_id))

@@ -54,17 +54,17 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             raise CannotConnect(e) from e
     except Exception as exc:
         raise CannotConnect(exc) from exc
-    
+
     try:
         await api.current()
         statuses = await api.last_statuses()
     except aiohttp.ClientResponseError as e:
-        if e.status == 401:        
+        if e.status == 401:
             raise MissingPaidSubscription from e
         else:
             raise CannotConnect(e) from e
     except Exception as exc:
-        raise CannotConnect(exc) from exc   
+        raise CannotConnect(exc) from exc
 
     if not statuses:
         raise EmptyResponse()
@@ -96,7 +96,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_data_schema = vol.Schema(
             {
                 vol.Required("user_email", default=get_default("user_email")): str,
-                vol.Required("user_password", default=get_default("user_password")): str,
+                vol.Required(
+                    "user_password", default=get_default("user_password")
+                ): str,
                 vol.Required("robot_id", default=get_default("robot_id")): str,
             }
         )
@@ -183,8 +185,10 @@ class CannotConnect(HomeAssistantError):
 class InvalidAuth(HomeAssistantError):
     """Error to indicate auth fail"""
 
+
 class MissingPaidSubscription(HomeAssistantError):
     """Error to indicate a missing paid subscription"""
+
 
 class EmptyResponse(HomeAssistantError):
     """Error to indicate we didn't find the robot."""

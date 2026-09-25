@@ -256,7 +256,10 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
                 async with async_timeout.timeout(10):
                     auth_works = len(await self.api.get_access_token()) > 10
                 if auth_works:
-                    _LOGGER.error("current %s but access_token works. missing paid subscription?", e.status)
+                    _LOGGER.error(
+                        "current %s but access_token works. missing paid subscription?",
+                        e.status,
+                    )
                     repairs.async_create_paid_subscription_issue(
                         self.hass, self._entry_id
                     )
@@ -268,9 +271,7 @@ class EchoRoboticsDataUpdateCoordinator(DataUpdateCoordinator):
         except asyncio.TimeoutError as e:
             exception = e
         else:
-            repairs.async_delete_paid_subscription_issue(
-                self.hass, self._entry_id
-            )
+            repairs.async_delete_paid_subscription_issue(self.hass, self._entry_id)
 
         if exception is not None:
             _LOGGER.info(
