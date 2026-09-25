@@ -46,7 +46,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         password=data["user_password"],
     )
     try:
-        statuses = await api.last_statuses()
+        auth = await api.get_access_token(force_refresh=True)
     except aiohttp.ClientResponseError as e:
         if e.status == 401:
             raise InvalidAuth from e
@@ -54,6 +54,16 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             raise CannotConnect(e) from e
     except Exception as exc:
         raise CannotConnect(exc) from exc
+    
+    try:
+        statuses = await api.last_statuses()
+    except aiohttp.ClientResponseError as e:
+        if e.status == 401:
+            raise MissingPaidSubscription from e
+        else:
+            raise CannotConnect(e) from e
+    except Exception as exc:
+        raise CannotConnect(exc) from exc   
 
     if not statuses:
         raise EmptyResponse()
@@ -103,6 +113,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors["base"] = "cannot_connect"
         except EmptyResponse:
             errors["base"] = "empty_response"
+        except MissingPaidSubscription:
+            errors["base"] = "missing_paid_subscription"
         except InvalidAuth:
             errors["base"] = "invalid_auth"
         except Exception:  # pylint: disable=broad-except
@@ -168,6 +180,8 @@ class CannotConnect(HomeAssistantError):
 class InvalidAuth(HomeAssistantError):
     """Error to indicate auth fail"""
 
+class MissingPaidSubscription(HomeAssistantError):
+    """Error to indicate a missing paid subscription"""
 
 class EmptyResponse(HomeAssistantError):
     """Error to indicate we didn't find the robot."""

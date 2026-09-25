@@ -20,6 +20,8 @@
       }
     },
     "error": {
+      "empty_response": "Authentication ok, but empty robot information received. Check robot_id.",
+      "missing_paid_subscription": "Authentication ok, but 401 for robot infos. Is the paid subscription active?",
       "cannot_connect": "Failed to connect",
       "invalid_auth": "Invalid Authentication",
       "unknown": "Unexpected error"

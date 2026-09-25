@@ -20,6 +20,8 @@
       }
     },
     "error": {
+      "empty_response": "Anmeldung okay, aber leere Roboter infos empfangen. Bitte robot_id überprüfen.",
+      "missing_paid_subscription": "Anmeldung ok, aber 401 bekommen. Ist das Abonnement aktiv?",
       "cannot_connect": "Fehler beim Verbinden",
       "invalid_auth": "Authentifizierung fehlgeschlagen",
       "unknown": "Unbekannter Fehler"
