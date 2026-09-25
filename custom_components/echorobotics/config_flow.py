@@ -56,9 +56,10 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         raise CannotConnect(exc) from exc
     
     try:
+        await api.current()
         statuses = await api.last_statuses()
     except aiohttp.ClientResponseError as e:
-        if e.status == 401:
+        if e.status == 401:        
             raise MissingPaidSubscription from e
         else:
             raise CannotConnect(e) from e
@@ -151,6 +152,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "cannot_connect"
             except EmptyResponse:
                 errors["base"] = "empty_response"
+            except MissingPaidSubscription:
+                errors["base"] = "missing_paid_subscription"
             except InvalidAuth:
                 errors["base"] = "invalid_auth"
             except Exception:  # pylint: disable=broad-except
