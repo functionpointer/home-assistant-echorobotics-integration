@@ -11,6 +11,6 @@
   "issue_tracker": "https://github.com/functionpointer/home-assistant-echorobotics-integration/issues",
   "requirements": ["pyechorobotics==2.3.0"],
   "ssdp": [],
-  "version": "3.2.0",
+  "version": "3.3.0",
   "zeroconf": []
 }
