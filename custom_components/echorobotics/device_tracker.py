@@ -54,16 +54,24 @@ class EchoRoboticsLocation(EchoRoboticsBaseEntity, TrackerEntity):
         """Handle updated data from the coordinator."""
         self.async_write_ha_state()
 
+    def _has_position_data(self) -> bool:
+        return bool(
+            self.status_info
+            and self.status_info.position
+            and self.status_info.position.longitude != 0
+            and self.status_info.position.latitude != 0
+        )
+
     @property
     def longitude(self):
-        if self.status_info:
+        if self._has_position_data():
             return self.status_info.position.longitude
         else:
             return None
 
     @property
     def latitude(self):
-        if self.status_info:
+        if self._has_position_data():
             return self.status_info.position.latitude
         else:
             return None
