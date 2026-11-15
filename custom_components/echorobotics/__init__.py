@@ -16,9 +16,15 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
-from homeassistant.helpers.typing import Undefined
+
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers import device_registry, entity_registry
+from homeassistant.const import MAJOR_VERSION
+
+if MAJOR_VERSION >= 2027:
+    from homeassistant.helpers.typing import Undefined
+else:
+    from homeassistant.helpers.typing import UNDEFINED as Undefined
 
 from .const import (
     DOMAIN,
